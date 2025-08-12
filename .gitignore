@@ -8,6 +8,73 @@ __pycache__/
 # Byte-compiled / optimized / DLL files
 *.pyo
 *.pyd
+
+# SQLite databases
+*.sqlite3
+*.db
+
+# Logs
+*.log
+
+# ============================================
+# Virtual environments
+# ============================================
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# ============================================
+# Django
+# ============================================
+*.pot
+*.pyc
+*.pyo
+*.db
+media/
+staticfiles/
+*.mo
+
+# Ignore local settings
+settings_local.py
+
+# ============================================
+# VS Code
+# ============================================
+.vscode/
+
+# ============================================
+# OS Files
+# ============================================
+.DS_Store
+Thumbs.db
+
+# ============================================
+# Testing / Coverage
+# ============================================
+.coverage
+.tox/
+nosetests.xml
+coverage.xml
+htmlcov/
+
+# ============================================
+# Migrations (optional)
+# ============================================
+# Uncomment below if you don’t want to track initial migrations
+# */migrations/*
+# !*/migrations/__init__.py
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Byte-compiled / optimized / DLL files
+*.pyo
+*.pyd
 *.pyd
 
 # SQLite databases
