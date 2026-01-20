@@ -1,32 +1,59 @@
 {% extends 'pos/base.html' %}
 
+{% block title %}Sales List{% endblock %}
+
 {% block content %}
-<h2>Sales List</h2>
+<h2 class="mb-4">🧾 Sales List</h2>
 
-<table border="1">
-    <tr>
-        <th>Product</th>
-        <th>Qty</th>
-        <th>Selling Price</th>
-        <th>Total</th>
-        <th>Status</th>
-        <th>Date</th>
-    </tr>
+<table class="table table-bordered table-striped align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>Date</th>
+            <th>Customer</th>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>SP</th>
+            <th>Total</th>
+            <th>Paid</th>
+            <th>Remaining</th>
+            <th>Profit</th>
+            <th>Payment Mode</th>
+            <th>Status</th>
+        </tr>
+    </thead>
 
+    <tbody>
     {% for sale in sales %}
-    <tr>
-        <td>{{ sale.product.name }}</td>
-        <td>{{ sale.quantity }}</td>
-        <td>{{ sale.selling_price }}</td>
-        <td>{{ sale.total_price }}</td>
-        <td>{{ sale.status }}</td>
-        <td>{{ sale.date }}</td>
-    </tr>
+        <tr>
+            <td>{{ sale.date|date:"d M Y H:i" }}</td>
+            <td>
+                {% if sale.customer %}
+                    {{ sale.customer.name }}
+                {% else %}
+                    Walk-in
+                {% endif %}
+            </td>
+            <td>{{ sale.product.name }}</td>
+            <td>{{ sale.quantity }}</td>
+            <td>{{ sale.selling_price }}</td>
+            <td>{{ sale.total_price }}</td>
+            <td>{{ sale.paid_amount }}</td>
+            <td>{{ sale.remaining_amount }}</td>
+            <td>{{ sale.profit }}</td>
+            <td>{{ sale.payment_mode }}</td>
+            <td>
+                {% if sale.status == 'COMPLETED' %}
+                    <span class="badge bg-success">Completed</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark">Pending</span>
+                {% endif %}
+            </td>
+        </tr>
     {% empty %}
-    <tr>
-        <td colspan="6">No sales yet</td>
-    </tr>
+        <tr>
+            <td colspan="11" class="text-center text-muted">No sales found</td>
+        </tr>
     {% endfor %}
+    </tbody>
 </table>
-
 {% endblock %}

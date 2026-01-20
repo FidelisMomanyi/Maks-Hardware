@@ -1,0 +1,58 @@
+{% extends 'pos/base.html' %}
+
+{% block title %}Analytics{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">📊 Analytics Dashboard</h2>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-bg-primary mb-3">
+            <div class="card-header">Daily Sales</div>
+            <div class="card-body">
+                <h5 class="card-title">Ksh {{ daily.total_sales|default:"0" }}</h5>
+                <p class="card-text">Profit: Ksh {{ daily.total_profit|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-bg-success mb-3">
+            <div class="card-header">Weekly Sales</div>
+            <div class="card-body">
+                <h5 class="card-title">Ksh {{ weekly.total_sales|default:"0" }}</h5>
+                <p class="card-text">Profit: Ksh {{ weekly.total_profit|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-bg-warning mb-3">
+            <div class="card-header">Monthly Sales</div>
+            <div class="card-body">
+                <h5 class="card-title">Ksh {{ monthly.total_sales|default:"0" }}</h5>
+                <p class="card-text">Profit: Ksh {{ monthly.total_profit|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-bg-danger mb-3">
+            <div class="card-header">Yearly Sales</div>
+            <div class="card-body">
+                <h5 class="card-title">Ksh {{ yearly.total_sales|default:"0" }}</h5>
+                <p class="card-text">Profit: Ksh {{ yearly.total_profit|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Low stock alert -->
+<div class="card text-bg-danger mb-4">
+    <div class="card-body">
+        <h5 class="card-title">⚠ Low Stock Products</h5>
+        <p class="card-text">You have {{ low_stock }} products at or below their reorder level.</p>
+        <a href="{% url 'product_list' %}" class="btn btn-light">View Products</a>
+    </div>
+</div>
+{% endblock %}

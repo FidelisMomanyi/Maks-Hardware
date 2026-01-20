@@ -3,16 +3,62 @@
 {% block title %}New Sale{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">💰 New Sale</h2>
+<h2 class="mb-4">💰 New Sale</h2>
 
-    <form method="POST">
+<div class="card p-4 mb-4">
+    <form method="post">
         {% csrf_token %}
-
-        <!-- Customer Selection -->
         <div class="mb-3">
-            <label for="customer" class="form-label">Customer (optional)</label>
-            <select name="customer" id="customer" class="form-select">
+            <label for="customer" class="form-label">Customer</label>
+            <select class="form-select" name="customer">
                 <option value="">Walk-in</option>
-                {% for customer in customers %}
-                    <option value="{{ customer.i
+                {% for c in customers %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="product" class="form-label">Product</label>
+            <select class="form-select" name="product" required>
+                {% for p in products %}
+                <option value="{{ p.id }}">{{ p.name }} (Stock: {{ p.stock_quantity }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="quantity" class="form-label">Quantity</label>
+            <input type="number" class="form-control" name="quantity" min="1" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="selling_price" class="form-label">Selling Price</label>
+            <input type="number" class="form-control" step="0.01" name="selling_price">
+        </div>
+
+        <div class="mb-3">
+            <label for="payment_mode" class="form-label">Payment Method</label>
+            <select class="form-select" name="payment_mode" required>
+                <option value="CASH">Cash</option>
+                <option value="MPESA">M-Pesa</option>
+                <option value="BANK">Bank</option>
+                <option value="LOOP">Loop</option>
+                <option value="CREDIT">Credit</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="paid_amount" class="form-label">Amount Paid</label>
+            <input type="number" class="form-control" step="0.01" name="paid_amount" value="0">
+        </div>
+
+        <div class="mb-3">
+            <label for="pin" class="form-label">Admin PIN (for overrides)</label>
+            <input type="password" class="form-control" name="pin">
+        </div>
+
+        <button type="submit" class="btn btn-success">Record Sale</button>
+    </form>
+</div>
+{% endblock %}

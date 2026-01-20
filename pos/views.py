@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import Product, StockIn, Sale
+from .models import Product, StockIn, Sale, Customer, Payment
 from django.db.models import Sum, F
+from django.utils import timezone
+from datetime import timedelta
 
 # Create your views here.
 
@@ -10,33 +12,9 @@ ADMIN_PIN = "1234"
 # ---------- Product List ----------
 def product_list(request):
     products = Product.objects.all()
+    return render(request, 'pos/product_list.html', {'products': products})
 
-    # Calculate real stock
-    product_data = []
-    for p in products:
-        total_stock_in = StockIn.objects.filter(product=p).aggregate(
-            total_in=Sum('quantity')
-        )['total_in'] or 0
-
-        total_sold = Sale.objects.filter(
-            product=p, status='COMPLETED'
-        ).aggregate(
-            total_out=Sum('quantity')
-        )['total_out'] or 0
-
-        current_stock = total_stock_in - total_sold
-
-        product_data.append({
-            'id': p.id,
-            'name': p.name,
-            'buying_price': p.buying_price,
-            'selling_price': p.selling_price,
-            'stock': current_stock,
-            'reorder_level': p.reorder_level,
-        })
-
-    return render(request, 'pos/product_list.html', {'products': product_data})
-
+# ---------- Add Product ----------
 def product_create(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -57,7 +35,7 @@ def product_create(request):
 
     return render(request, 'pos/product_create.html')
 
-# ---------- Add Stock ----------
+# ---------- Stock In ----------
 def stock_in(request):
     if request.method == 'POST':
         product = get_object_or_404(Product, id=request.POST.get('product'))
@@ -83,68 +61,107 @@ def stock_in(request):
     products = Product.objects.all()
     return render(request, 'pos/stock_in.html', {'products': products})
 
-# ---------- Record Sale ----------
+# ---------- Create Sale ----------
 def sale_create(request):
     products = Product.objects.all()
+    customers = Customer.objects.all()
 
     if request.method == "POST":
         product = get_object_or_404(Product, id=request.POST['product'])
+        customer_id = request.POST.get('customer')
+        customer = get_object_or_404(Customer, id=customer_id) if customer_id else None
         qty = int(request.POST['quantity'])
         sp = float(request.POST.get('selling_price', product.selling_price))
-        payment = request.POST['payment_mode']
+        payment_mode = request.POST['payment_mode']
         paid = float(request.POST.get('paid_amount', 0))
         pin = request.POST.get('pin')
 
-        # Stock check
+        # ---------- Stock Check ----------
         if qty > product.stock_quantity and pin != ADMIN_PIN:
-            messages.error(request, "Insufficient stock. Admin PIN required.")
+            messages.error(request, "Insufficient stock. Admin PIN required to proceed.")
             return redirect('sale_create')
 
-        # Selling below buying price check
+        # ---------- Selling Below Buying Price Check ----------
         if sp < product.buying_price and pin != ADMIN_PIN:
             messages.error(request, "Selling below buying price requires Admin PIN.")
             return redirect('sale_create')
 
-        # Calculate totals
+        # ---------- Calculate Totals ----------
         total_price = sp * qty
         remaining = max(total_price - paid, 0)
         profit = (sp - product.buying_price) * qty
 
-        # Determine status
-        if remaining > 0:
-            status = 'PENDING_PAYMENT'
-        else:
-            status = 'COMPLETED'
+        # ---------- Determine Status ----------
+        status = 'COMPLETED' if remaining == 0 else 'PENDING_PAYMENT'
 
-        # Save Sale
+        # ---------- Record Sale ----------
         sale = Sale.objects.create(
             product=product,
+            customer=customer,
             quantity=qty,
             selling_price=sp,
             total_price=total_price,
             paid_amount=paid,
             remaining_amount=remaining,
             profit=profit,
-            payment_mode=payment,
+            payment_mode=payment_mode,
             status=status,
             approved_by_pin=True if pin == ADMIN_PIN else False
         )
 
-        # Deduct stock only for completed or partial stock sale
+        # ---------- Deduct Stock ----------
         if qty <= product.stock_quantity:
             product.stock_quantity -= qty
             product.save()
 
-        messages.success(request, f"Sale recorded! Status: {status}")
+        # ---------- Record Payment ----------
+        if paid > 0:
+            Payment.objects.create(
+                sale=sale,
+                amount_paid=paid,
+                payment_mode=payment_mode
+            )
+
+        messages.success(request, f"Sale recorded! Status: {status}. Remaining: {remaining}")
         return redirect('sales_list')
 
-    return render(request, 'pos/sale_form.html', {'products': products})
+    return render(request, 'pos/sale_form.html', {
+        'products': products,
+        'customers': customers
+    })
 
 # ---------- Sales List ----------
 def sales_list(request):
-    sales = Sale.objects.select_related('product').order_by('-date')
+    sales = Sale.objects.select_related('product', 'customer').order_by('-date')
     return render(request, 'pos/sales_list.html', {'sales': sales})
 
+# ---------- Analytics ----------
 def analytics(request):
-    return render(request, 'pos/analytics.html')
+    today = timezone.now().date()
 
+    # Sales & profits
+    daily = Sale.objects.filter(date__date=today).aggregate(
+        total_sales=Sum('total_price'), total_profit=Sum('profit')
+    )
+    weekly = Sale.objects.filter(date__gte=today - timedelta(days=7)).aggregate(
+        total_sales=Sum('total_price'), total_profit=Sum('profit')
+    )
+    monthly = Sale.objects.filter(date__month=today.month, date__year=today.year).aggregate(
+        total_sales=Sum('total_price'), total_profit=Sum('profit')
+    )
+    yearly = Sale.objects.filter(date__year=today.year).aggregate(
+        total_sales=Sum('total_price'), total_profit=Sum('profit')
+    )
+
+    # Low stock products
+    low_stock = Product.objects.filter(stock_quantity__lte=F('reorder_level')).count()
+
+    context = {
+        'daily': daily,
+        'weekly': weekly,
+        'monthly': monthly,
+        'yearly': yearly,
+        'low_stock': low_stock,
+    }
+
+    return render(request, 'pos/analytics.html', context)
