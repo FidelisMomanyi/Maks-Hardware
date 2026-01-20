@@ -1,0 +1,32 @@
+{% extends 'pos/base.html' %}
+
+{% block content %}
+<h2>Sales List</h2>
+
+<table border="1">
+    <tr>
+        <th>Product</th>
+        <th>Qty</th>
+        <th>Selling Price</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th>Date</th>
+    </tr>
+
+    {% for sale in sales %}
+    <tr>
+        <td>{{ sale.product.name }}</td>
+        <td>{{ sale.quantity }}</td>
+        <td>{{ sale.selling_price }}</td>
+        <td>{{ sale.total_price }}</td>
+        <td>{{ sale.status }}</td>
+        <td>{{ sale.date }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="6">No sales yet</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

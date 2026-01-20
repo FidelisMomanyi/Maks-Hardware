@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hardware POS</title>
+</head>
+<body>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+    <hr>
+
+    {% block content %}
+    {% endblock %}
+
+</body>
+</html>

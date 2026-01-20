@@ -1,0 +1,56 @@
+{% extends 'pos/base.html' %}
+
+{% block title %}Price List{% endblock %}
+
+{% block content %}
+<h2 class="mb-3">Price List</h2>
+
+<div class="mb-3">
+    <a href="{% url 'stock_in' %}" class="btn btn-primary">Add Stock</a>
+    <a href="{% url 'sale_create' %}" class="btn btn-success">New Sale</a>
+</div>
+
+<table class="table table-bordered table-striped align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>Product</th>
+            <th>Buying Price (BP)</th>
+            <th>Selling Price (SP)</th>
+            <th>Stock</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for product in products %}
+        <tr>
+            <td>{{ product.name }}</td>
+            <td>{{ product.buying_price }}</td>
+            <td>{{ product.selling_price }}</td>
+            <td>{{ product.stock_quantity }}</td>
+            <td>
+                {% if product.stock_quantity == 0 %}
+                    <span class="badge bg-danger">Out of Stock</span>
+                {% elif product.stock_quantity <= product.reorder_level %}
+                    <span class="badge bg-warning text-dark">Low</span>
+                {% else %}
+                    <span class="badge bg-success">OK</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'product_edit' product.id %}"
+                   class="btn btn-sm btn-warning">
+                   Edit Price
+                </a>
+            </td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="6" class="text-center text-muted">
+                No products found.
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

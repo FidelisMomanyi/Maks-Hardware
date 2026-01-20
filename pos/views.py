@@ -11,6 +11,26 @@ def product_list(request):
     products = Product.objects.all()
     return render(request, 'pos/product_list.html', {'products': products})
 
+def product_create(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        buying_price = float(request.POST.get('buying_price'))
+        selling_price = float(request.POST.get('selling_price'))
+        reorder_level = int(request.POST.get('reorder_level', 5))
+
+        Product.objects.create(
+            name=name,
+            buying_price=buying_price,
+            selling_price=selling_price,
+            stock_quantity=0,
+            reorder_level=reorder_level
+        )
+
+        messages.success(request, "Product added successfully")
+        return redirect('product_list')
+
+    return render(request, 'pos/product_create.html')
+
 # ---------- Add Stock ----------
 def stock_in(request):
     if request.method == 'POST':
@@ -82,3 +102,6 @@ def sale_create(request):
 def sales_list(request):
     sales = Sale.objects.select_related('product').order_by('-date')
     return render(request, 'pos/sales_list.html', {'sales': sales})
+
+def analytics(request):
+    return render(request, 'pos/analytics.html')

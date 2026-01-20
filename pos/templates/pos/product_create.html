@@ -1,0 +1,36 @@
+{% extends 'pos/base.html' %}
+
+{% block content %}
+<h2>Add Product</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <a href="{% url 'product_create' %}" class="btn btn-success mb-3">
+        Add Product
+    </a>
+    
+
+    <div>
+        <label>Product Name</label>
+        <input type="text" name="name" required>
+    </div>
+
+    <div>
+        <label>Buying Price</label>
+        <input type="number" step="0.01" name="buying_price" required>
+    </div>
+
+    <div>
+        <label>Selling Price</label>
+        <input type="number" step="0.01" name="selling_price" required>
+    </div>
+
+    <div>
+        <label>Reorder Level</label>
+        <input type="number" name="reorder_level" value="5">
+    </div>
+
+    <button type="submit">Save Product</button>
+</form>
+{% endblock %}
