@@ -10,4 +10,6 @@ urlpatterns = [
     path('sale/', views.sale_create, name='sale_create'),
     path('analytics/', views.analytics, name='analytics'),
     path('products/add/', views.product_create, name='product_create'),
+    path('products/create/', views.product_create, name='product_create'),
+    path('products/<int:pk>/edit/', views.product_edit, name='product_edit'),  # <- make sure this exists
 ]

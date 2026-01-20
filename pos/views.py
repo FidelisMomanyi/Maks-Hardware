@@ -4,6 +4,7 @@ from .models import Product, StockIn, Sale, Customer, Payment
 from django.db.models import Sum, F
 from django.utils import timezone
 from datetime import timedelta
+from decimal import Decimal
 
 # Create your views here.
 
@@ -62,6 +63,7 @@ def stock_in(request):
     return render(request, 'pos/stock_in.html', {'products': products})
 
 # ---------- Create Sale ----------
+
 def sale_create(request):
     products = Product.objects.all()
     customers = Customer.objects.all()
@@ -70,10 +72,11 @@ def sale_create(request):
         product = get_object_or_404(Product, id=request.POST['product'])
         customer_id = request.POST.get('customer')
         customer = get_object_or_404(Customer, id=customer_id) if customer_id else None
+
         qty = int(request.POST['quantity'])
-        sp = float(request.POST.get('selling_price', product.selling_price))
+        sp = Decimal(request.POST.get('selling_price', product.selling_price))
         payment_mode = request.POST['payment_mode']
-        paid = float(request.POST.get('paid_amount', 0))
+        paid = Decimal(request.POST.get('paid_amount', 0))
         pin = request.POST.get('pin')
 
         # ---------- Stock Check ----------
@@ -88,7 +91,7 @@ def sale_create(request):
 
         # ---------- Calculate Totals ----------
         total_price = sp * qty
-        remaining = max(total_price - paid, 0)
+        remaining = max(total_price - paid, Decimal('0.00'))
         profit = (sp - product.buying_price) * qty
 
         # ---------- Determine Status ----------
@@ -110,9 +113,8 @@ def sale_create(request):
         )
 
         # ---------- Deduct Stock ----------
-        if qty <= product.stock_quantity:
-            product.stock_quantity -= qty
-            product.save()
+        product.stock_quantity -= qty
+        product.save()
 
         # ---------- Record Payment ----------
         if paid > 0:
@@ -129,7 +131,6 @@ def sale_create(request):
         'products': products,
         'customers': customers
     })
-
 # ---------- Sales List ----------
 def sales_list(request):
     sales = Sale.objects.select_related('product', 'customer').order_by('-date')
@@ -165,3 +166,14 @@ def analytics(request):
     }
 
     return render(request, 'pos/analytics.html', context)
+
+def product_edit(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == 'POST':
+        form = ProductForm(request.POST, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect('product_list')
+    else:
+        form = ProductForm(instance=product)
+    return render(request, 'pos/product_edit.html', {'form': form})
