@@ -3,49 +3,49 @@
 {% block title %}New Sale{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">New Sale</h2>
+<h2>💰 New Sale</h2>
 
-<form method="POST" class="card p-4 shadow-sm">
+<form method="POST">
     {% csrf_token %}
-
     <div class="mb-3">
-        <label class="form-label">Product</label>
+        <label>Product</label>
         <select name="product" class="form-select" required>
-            {% for product in products %}
-                <option value="{{ product.id }}">
-                    {{ product.name }} (Stock: {{ product.stock_quantity }})
-                </option>
+            {% for p in products %}
+                <option value="{{ p.id }}">{{ p.name }} (Stock: {{ p.stock_quantity }})</option>
             {% endfor %}
         </select>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Quantity</label>
+        <label>Quantity</label>
         <input type="number" name="quantity" class="form-control" min="1" required>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Payment Mode</label>
-        <select name="payment_mode" class="form-select" required>
-            <option value="Cash">Cash</option>
-            <option value="Mpesa">M-pesa</option>
-            <option value="Loop">Loop</option>
-            <option value="Bank">Bank</option>
-            <option value="Credit">Credit</option>
+        <label>Selling Price</label>
+        <input type="number" name="selling_price" class="form-control" step="0.01">
+    </div>
+
+    <div class="mb-3">
+        <label>Payment Mode</label>
+        <select name="payment_mode" class="form-select">
+            <option value="CASH">Cash</option>
+            <option value="MPESA">M-Pesa</option>
+            <option value="BANK">Bank</option>
+            <option value="CREDIT">Credit</option>
         </select>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Admin PIN (only if prompted)</label>
+        <label>Amount Paid</label>
+        <input type="number" name="paid_amount" class="form-control" step="0.01" value="0">
+    </div>
+
+    <div class="mb-3">
+        <label>Admin PIN (if needed)</label>
         <input type="password" name="pin" class="form-control">
     </div>
 
-    <button type="submit" class="btn btn-success">
-        Complete Sale
-    </button>
-
-    <a href="{% url 'sales_list' %}" class="btn btn-secondary ms-2">
-        Back to Sales
-    </a>
+    <button type="submit" class="btn btn-success">Save Sale</button>
 </form>
 {% endblock %}

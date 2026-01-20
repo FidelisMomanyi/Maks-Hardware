@@ -6,8 +6,8 @@
 <h2 class="mb-4">📋 Price List</h2>
 
 <div class="mb-3">
-    <a href="{% url 'stock_in' %}" class="btn btn-primary"> Add Stock</a>
-    <a href="{% url 'sale_create' %}" class="btn btn-success ms-2"> New Sale</a>
+    <a href="{% url 'stock_in' %}" class="btn btn-primary">Add Stock</a>
+    <a href="{% url 'sale_create' %}" class="btn btn-success ms-2">New Sale</a>
 </div>
 
 <table class="table table-bordered table-striped align-middle">
@@ -28,20 +28,18 @@
             <td>{{ product.name }}</td>
             <td>{{ product.buying_price }}</td>
             <td>{{ product.selling_price }}</td>
-            <td>{{ product.stock_quantity }}</td>
+            <td>{{ product.stock }}</td>
             <td>
-                {% if product.stock_quantity == 0 %}
+                {% if product.stock == 0 %}
                     <span class="badge bg-danger">Out</span>
-                {% elif product.stock_quantity <= product.reorder_level %}
+                {% elif product.stock <= product.reorder_level %}
                     <span class="badge bg-warning text-dark">Low</span>
                 {% else %}
                     <span class="badge bg-success">OK</span>
                 {% endif %}
             </td>
             <td>
-                <a href="{% url 'product_edit' product.id %}" class="btn btn-sm btn-warning">
-                    Edit Price
-                </a>
+                <a href="{% url 'product_edit' product.id %}" class="btn btn-sm btn-warning">Edit Price</a>
             </td>
         </tr>
     {% empty %}
